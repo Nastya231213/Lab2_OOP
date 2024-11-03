@@ -75,15 +75,5 @@ public class TouristVoucherDOMParser {
         return tour;
     }
 
-
-    private static HotelCharacteristicType createHotelFromElement(Element hotelElement) {
-        HotelCharacteristicType hotel = new HotelCharacteristicType();
-        hotel.setStars(Integer.parseInt(hotelElement.getElementsByTagName("Stars").item(0).getTextContent()));
-
-        hotel.setTV(Boolean.parseBoolean(hotelElement.getElementsByTagName("TV").item(0).getTextContent()));
-        hotel.setAirConditioner(Boolean.parseBoolean(hotelElement.getElementsByTagName("AirConditioner").item(0).getTextContent()));
-
-        return hotel;
-    }
 }
 

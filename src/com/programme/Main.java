@@ -4,6 +4,7 @@ import com.model.TouristVoucher;
 import com.parser.TouristVoucherDOMParser;
 import com.parser.TouristVoucherSAXParser;
 import com.parser.TouristVoucherStAXParser;
+import com.sort.SortTrip;
 
 import java.util.List;
 
@@ -19,7 +20,7 @@ public class Main {
 
         System.out.println("\nПарсинг за допомогою DOM:");
         List<TouristVoucher.Tour> domTours = TouristVoucherDOMParser.parse(filePath);
-        printTours(domTours);
+        printTours(SortTrip.sort(domTours));
 
         System.out.println("\nПарсинг за допомогою StAX:");
         List<TouristVoucher.Tour> staxTours = TouristVoucherStAXParser.parse(filePath);
