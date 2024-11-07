@@ -46,7 +46,4 @@ class TouristVoucherDOMParserTest {
         assertNotNull(tours);
         assertTrue(tours.isEmpty());
     }
-
-
-
 }

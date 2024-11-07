@@ -12,7 +12,7 @@ import java.io.FileInputStream;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
-import com.logger.LoggerUtility; 
+import com.logger.LoggerUtility;
 
 public class TouristVoucherStAXParser {
 
