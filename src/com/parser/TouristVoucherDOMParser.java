@@ -1,6 +1,7 @@
 package com.parser;
 
 import com.model.*;
+import com.logger.LoggerUtility; // Import LoggerUtility
 import org.w3c.dom.*;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -11,10 +12,9 @@ import java.util.List;
 
 public class TouristVoucherDOMParser {
 
-
-
     public static List<TouristVoucher.Tour> parse(String filePath) {
         List<TouristVoucher.Tour> tours = new ArrayList<>();
+
 
         try {
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -25,6 +25,7 @@ public class TouristVoucherDOMParser {
             doc.getDocumentElement().normalize();
 
             NodeList tourList = doc.getElementsByTagName("Tour");
+
 
             for (int i = 0; i < tourList.getLength(); i++) {
                 Node tourNode = tourList.item(i);
@@ -37,7 +38,7 @@ public class TouristVoucherDOMParser {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            LoggerUtility.error("Error while parsing XML file: " + filePath, e); // Log exception
         }
 
         return tours;
@@ -46,34 +47,39 @@ public class TouristVoucherDOMParser {
     private static TouristVoucher.Tour createTourFromElement(Element tourElement) {
         TouristVoucher.Tour tour = new TouristVoucher.Tour();
 
-        tour.setId(tourElement.getAttribute("id"));
-        tour.setCountry(tourElement.getElementsByTagName("Country").item(0).getTextContent());
-        tour.setNumberDaysNights(Integer.parseInt(tourElement.getElementsByTagName("NumberDaysNights").item(0).getTextContent()));
-        tour.setTransport(TransportType.fromValue(tourElement.getElementsByTagName("Transport").item(0).getTextContent()));
-        tour.setCost(new BigDecimal(tourElement.getElementsByTagName("Cost").item(0).getTextContent()));
-        NodeList hotelCharacteristics = tourElement.getElementsByTagName("HotelCharacteristics");
-        List<HotelCharacteristicType> characteristicsList = new ArrayList<>();
 
-        for (int i = 0; i < hotelCharacteristics.getLength(); i++) {
-            Element characteristicElement = (Element) hotelCharacteristics.item(i);
-            HotelCharacteristicType characteristic = new HotelCharacteristicType();
-            characteristic.setStars(Integer.parseInt(characteristicElement.getElementsByTagName("Stars").item(0).getTextContent()));
+        try {
+            tour.setId(tourElement.getAttribute("id"));
+            tour.setCountry(tourElement.getElementsByTagName("Country").item(0).getTextContent());
+            tour.setNumberDaysNights(Integer.parseInt(tourElement.getElementsByTagName("NumberDaysNights").item(0).getTextContent()));
+            tour.setTransport(TransportType.fromValue(tourElement.getElementsByTagName("Transport").item(0).getTextContent()));
+            tour.setCost(new BigDecimal(tourElement.getElementsByTagName("Cost").item(0).getTextContent()));
 
-            FoodType foodType = FoodType.fromValue(characteristicElement.getElementsByTagName("FoodIncluded").item(0).getTextContent());
-            characteristic.setFoodIncluded(foodType);
-            String roomTypeValue = characteristicElement.getElementsByTagName("RoomType").item(0).getTextContent();
-            RoomType roomType = RoomType.fromValue(roomTypeValue);
+            NodeList hotelCharacteristics = tourElement.getElementsByTagName("HotelCharacteristics");
+            List<HotelCharacteristicType> characteristicsList = new ArrayList<>();
 
-          characteristic.setRoomType(roomType);
-            characteristic.setTV(Boolean.parseBoolean(characteristicElement.getElementsByTagName("TV").item(0).getTextContent()));
-            characteristic.setAirConditioner(Boolean.parseBoolean(characteristicElement.getElementsByTagName("AirConditioner").item(0).getTextContent()));
-            characteristicsList.add(characteristic);
+            for (int i = 0; i < hotelCharacteristics.getLength(); i++) {
+                Element characteristicElement = (Element) hotelCharacteristics.item(i);
+                HotelCharacteristicType characteristic = new HotelCharacteristicType();
+                characteristic.setStars(Integer.parseInt(characteristicElement.getElementsByTagName("Stars").item(0).getTextContent()));
+
+                FoodType foodType = FoodType.fromValue(characteristicElement.getElementsByTagName("FoodIncluded").item(0).getTextContent());
+                characteristic.setFoodIncluded(foodType);
+                String roomTypeValue = characteristicElement.getElementsByTagName("RoomType").item(0).getTextContent();
+                RoomType roomType = RoomType.fromValue(roomTypeValue);
+
+                characteristic.setRoomType(roomType);
+                characteristic.setTV(Boolean.parseBoolean(characteristicElement.getElementsByTagName("TV").item(0).getTextContent()));
+                characteristic.setAirConditioner(Boolean.parseBoolean(characteristicElement.getElementsByTagName("AirConditioner").item(0).getTextContent()));
+                characteristicsList.add(characteristic);
+            }
+
+            tour.setHotelCharacteristics(characteristicsList);
+
+        } catch (Exception e) {
+            LoggerUtility.error("Error while creating a tour from element: " + tourElement.getAttribute("id"), e);
         }
-
-        tour.setHotelCharacteristics(characteristicsList);
 
         return tour;
     }
-
 }
-

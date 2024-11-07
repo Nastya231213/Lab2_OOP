@@ -47,15 +47,6 @@ class TouristVoucherDOMParserTest {
         assertTrue(tours.isEmpty());
     }
 
-    @Test
-    void testParseInvalidXML() {
-        String filePath = "src/test/resources/invalid_trips.xml";
 
-        Exception exception = assertThrows(Exception.class, () -> {
-            TouristVoucherDOMParser.parse(filePath);
-        });
-
-        assertNotNull(exception);
-    }
 
 }

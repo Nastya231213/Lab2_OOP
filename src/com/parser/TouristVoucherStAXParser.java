@@ -12,8 +12,10 @@ import java.io.FileInputStream;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import com.logger.LoggerUtility; 
 
 public class TouristVoucherStAXParser {
+
     public static List<TouristVoucher.Tour> parse(String filePath) {
         List<TouristVoucher.Tour> tours = new ArrayList<>();
         TouristVoucher.Tour currentTour = null;
@@ -52,22 +54,46 @@ public class TouristVoucherStAXParser {
                             currentTour.setCountry(content.toString().trim());
                             break;
                         case "numberdaysnights":
-                            currentTour.setNumberDaysNights(Integer.parseInt(content.toString().trim())); // Trim the string before parsing
+                            try {
+                                currentTour.setNumberDaysNights(Integer.parseInt(content.toString().trim()));
+                            } catch (NumberFormatException e) {
+                                LoggerUtility.error("Error parsing number of days/nights for tour: " + currentTour.getId(), e);
+                            }
                             break;
                         case "transport":
-                            currentTour.setTransport(TransportType.fromValue(content.toString().trim()));
+                            try {
+                                currentTour.setTransport(TransportType.fromValue(content.toString().trim()));
+                            } catch (IllegalArgumentException e) {
+                                LoggerUtility.error("Invalid transport type for tour: " + currentTour.getId(), e);
+                            }
                             break;
                         case "cost":
-                            currentTour.setCost(new BigDecimal(content.toString().trim()));
+                            try {
+                                currentTour.setCost(new BigDecimal(content.toString().trim()));
+                            } catch (NumberFormatException e) {
+                                LoggerUtility.error("Invalid cost format for tour: " + currentTour.getId(), e);
+                            }
                             break;
                         case "stars":
-                            currentCharacteristic.setStars(Integer.parseInt(content.toString().trim()));
+                            try {
+                                currentCharacteristic.setStars(Integer.parseInt(content.toString().trim()));
+                            } catch (NumberFormatException e) {
+                                LoggerUtility.error("Invalid stars value for hotel in tour: " + currentTour.getId(), e);
+                            }
                             break;
                         case "foodincluded":
-                            currentCharacteristic.setFoodIncluded(FoodType.fromValue(content.toString().trim()));
+                            try {
+                                currentCharacteristic.setFoodIncluded(FoodType.fromValue(content.toString().trim()));
+                            } catch (IllegalArgumentException e) {
+                                LoggerUtility.error("Invalid food type value for hotel in tour: " + currentTour.getId(), e);
+                            }
                             break;
                         case "roomtype":
-                            currentCharacteristic.setRoomType(RoomType.fromValue(content.toString().trim()));
+                            try {
+                                currentCharacteristic.setRoomType(RoomType.fromValue(content.toString().trim()));
+                            } catch (IllegalArgumentException e) {
+                                LoggerUtility.error("Invalid room type value for hotel in tour: " + currentTour.getId(), e);
+                            }
                             break;
                         case "tv":
                             currentCharacteristic.setTV(Boolean.parseBoolean(content.toString()));
@@ -83,11 +109,11 @@ public class TouristVoucherStAXParser {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            LoggerUtility.error("Error parsing the XML file: " + filePath, e);  // Log general errors
         }
 
+        LoggerUtility.info("Completed parsing XML file: " + filePath); // Log the completion of parsing
         return tours;
     }
-
-
 }
+

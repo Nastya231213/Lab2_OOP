@@ -1,5 +1,6 @@
 package com.validation;
 
+import com.logger.LoggerUtility;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 import org.xml.sax.helpers.DefaultHandler;
@@ -16,36 +17,38 @@ public class XMLValidator {
     public static boolean validate(String xmlFilePath, String xsdFilePath) {
         SchemaFactory factory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
         try {
+
             Schema schema = factory.newSchema(new File(xsdFilePath));
             Validator validator = schema.newValidator();
 
             validator.setErrorHandler(new DefaultHandler() {
                 @Override
                 public void warning(SAXParseException e) throws SAXException {
-                    System.out.println("Warning: " + e.getMessage());
+                    LoggerUtility.warn("Warning: " + e.getMessage());
                 }
 
                 @Override
                 public void error(SAXParseException e) throws SAXException {
-                    System.out.println("Error: " + e.getMessage());
+                    LoggerUtility.error("Error: " + e.getMessage());
                     throw e;
                 }
 
                 @Override
                 public void fatalError(SAXParseException e) throws SAXException {
-                    System.out.println("Fatal error: " + e.getMessage());
+                    LoggerUtility.error("Fatal error: " + e.getMessage());
                     throw e;
                 }
             });
+
             validator.validate(new StreamSource(new File(xmlFilePath)));
-            System.out.println("XML файл успішно пройшов валідацію.");
+            LoggerUtility.info("XML file successfully passed validation.");
             return true;
 
         } catch (IOException e) {
-            System.out.println("IO помилка: " + e.getMessage());
+            LoggerUtility.error("IO error: " + e.getMessage());
             return false;
         } catch (SAXException e) {
-            System.out.println("XML валідація помилка: " + e.getMessage());
+            LoggerUtility.error("XML validation error: " + e.getMessage());
             return false;
         }
     }

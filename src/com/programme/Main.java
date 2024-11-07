@@ -5,6 +5,7 @@ import com.parser.TouristVoucherDOMParser;
 import com.parser.TouristVoucherSAXParser;
 import com.parser.TouristVoucherStAXParser;
 import com.sort.SortTrip;
+import com.logger.LoggerUtility;
 
 import java.util.List;
 
@@ -13,23 +14,23 @@ public class Main {
         String filePath = "src/resources/trips.xml";
         String schemaPath = "src/resources/tourist_voucher.xsd";
 
+        LoggerUtility.info("Парсинг за допомогою SAX:");
         TouristVoucherSAXParser saxParser = new TouristVoucherSAXParser();
-        System.out.println("Парсинг за допомогою SAX:");
         List<TouristVoucher.Tour> saxTours = saxParser.parse(filePath);
         printTours(saxTours);
 
-        System.out.println("\nПарсинг за допомогою DOM:");
+        LoggerUtility.info("Парсинг за допомогою DOM:");
         List<TouristVoucher.Tour> domTours = TouristVoucherDOMParser.parse(filePath);
         printTours(SortTrip.sort(domTours));
 
-        System.out.println("\nПарсинг за допомогою StAX:");
+        LoggerUtility.info("Парсинг за допомогою StAX:");
         List<TouristVoucher.Tour> staxTours = TouristVoucherStAXParser.parse(filePath);
         printTours(staxTours);
     }
 
     private static void printTours(List<TouristVoucher.Tour> tours) {
         for (TouristVoucher.Tour tour : tours) {
-            System.out.println(tour);
+            LoggerUtility.info(tour.toString());
         }
     }
 }

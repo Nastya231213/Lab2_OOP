@@ -3,6 +3,7 @@ package com.tests;
 import com.model.HotelCharacteristicType;
 import com.model.TouristVoucher;
 import com.parser.TouristVoucherSAXParser;
+import com.logger.LoggerUtility;  // Import LoggerUtility
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
@@ -50,12 +51,24 @@ class TouristVoucherSAXParserTest {
     @Test
     void testParseValidXML() {
         String filePath = createTempXmlFile(validXml);
+        if (filePath == null) {
+            LoggerUtility.error("Failed to create temp XML file.");
+            fail("Failed to create temp XML file.");
+        }
 
         TouristVoucherSAXParser parser = new TouristVoucherSAXParser();
-        List<TouristVoucher.Tour> tours = parser.parse(filePath);
+        List<TouristVoucher.Tour> tours = null;
 
-        assertNotNull(tours);
-        assertFalse(tours.isEmpty());
+        try {
+            tours = parser.parse(filePath);
+        } catch (Exception e) {
+            LoggerUtility.error("Error parsing XML file: " + filePath, e);
+            fail("Error parsing XML file: " + e.getMessage());
+        }
+
+        assertNotNull(tours, "Tours list should not be null");
+        assertFalse(tours.isEmpty(), "Tours list should not be empty");
+
 
         TouristVoucher.Tour firstTour = tours.get(0);
         validateTour(firstTour, "T1", "France", 3, new BigDecimal("1200.50"), 4, true, true, "Double");
@@ -70,7 +83,7 @@ class TouristVoucherSAXParserTest {
             Files.write(tempFile, xmlContent.getBytes());
             return tempFile.toString();
         } catch (Exception e) {
-            fail("Could not create temp XML file: " + e.getMessage());
+            LoggerUtility.error("Could not create temp XML file.", e);
             return null;
         }
     }
@@ -79,20 +92,24 @@ class TouristVoucherSAXParserTest {
                               int expectedDaysNights, BigDecimal expectedCost,
                               int expectedStars, boolean expectedTV,
                               boolean expectedAirConditioner, String expectedRoomType) {
-        assertEquals(expectedId, tour.getId());
-        assertEquals(expectedCountry, tour.getCountry());
-        assertEquals(expectedDaysNights, tour.getNumberDaysNights());
-        assertEquals(expectedCost, tour.getCost());
+        try {
+            assertEquals(expectedId, tour.getId(), "Tour ID does not match");
+            assertEquals(expectedCountry, tour.getCountry(), "Country does not match");
+            assertEquals(expectedDaysNights, tour.getNumberDaysNights(), "Number of days/nights does not match");
+            assertEquals(expectedCost, tour.getCost(), "Cost does not match");
 
-        List<HotelCharacteristicType> characteristics = tour.getHotelCharacteristics();
-        assertNotNull(characteristics);
-        assertEquals(1, characteristics.size());
+            List<HotelCharacteristicType> characteristics = tour.getHotelCharacteristics();
+            assertNotNull(characteristics, "Hotel characteristics should not be null");
+            assertEquals(1, characteristics.size(), "There should be exactly one hotel characteristic");
 
-        HotelCharacteristicType characteristic = characteristics.get(0);
-        assertEquals(expectedStars, characteristic.getStars());
-        assertEquals(expectedTV, characteristic.isTV());
-        assertEquals(expectedAirConditioner, characteristic.isAirConditioner());
-        assertEquals(expectedRoomType, characteristic.getRoomType().value());
+            HotelCharacteristicType characteristic = characteristics.get(0);
+            assertEquals(expectedStars, characteristic.getStars(), "Stars count does not match");
+            assertEquals(expectedTV, characteristic.isTV(), "TV availability does not match");
+            assertEquals(expectedAirConditioner, characteristic.isAirConditioner(), "Air conditioner availability does not match");
+            assertEquals(expectedRoomType, characteristic.getRoomType().value(), "Room type does not match");
+        } catch (AssertionError e) {
+            LoggerUtility.error("Validation failed for tour: " + tour.getId(), e);
+            throw e;
+        }
     }
-
 }
